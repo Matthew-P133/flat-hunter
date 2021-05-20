@@ -3,9 +3,9 @@ from bs4 import BeautifulSoup
 import json
 
 
-def scrape():
+def scrape(url):
     # get page html and write to file
-    page = requests.get("https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E475&maxBedrooms=3&minBedrooms=2&propertyTypes=&maxDaysSinceAdded=7&includeLetAgreed=false&mustHave=&dontShow=&furnishTypes=&keywords=")
+    page = requests.get(f"{url}")
     f = open("page.html", "w")
     f.write(f"{page.text}")
     f.close()
@@ -49,5 +49,5 @@ def scrape():
 
         i += 1
 
-scrape()
+
 
