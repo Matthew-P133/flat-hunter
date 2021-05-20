@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import json
 
 
-def scrape(url):
+def scrape(url, i):
     # get page html and write to file
     page = requests.get(url)
     f = open("page.html", "w")
@@ -27,12 +27,12 @@ def scrape(url):
 
     # convert json string to dictionary
     with open("page.json") as fp:
-        this_dict = json.load(fp)
+        page_dict = json.load(fp)
 
     # property data is contained in this element
-    properties = this_dict["properties"]
+    properties = page_dict["properties"]
 
-    i = 1
+    
 
     # print various data for each property
     for property in properties:
@@ -48,6 +48,7 @@ def scrape(url):
         # TODO: return this data in a useful form for rest of program
 
         i += 1
+    return page_dict, i
 
 def url_generator(attributes):
 
@@ -56,7 +57,7 @@ def url_generator(attributes):
     for attribute in attributes:
         url = url + "&" + attribute + "=" + str(attributes[attribute])
         print(url)
-        return url
+    return url
 
 
 
