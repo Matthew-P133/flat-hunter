@@ -21,6 +21,7 @@ for tag in x:
         f = open("page.json", "w")
         f.write(f"{json_string}")
         f.close()
+        break
 
 # convert json string to dictionary
 with open("page.json") as fp:
