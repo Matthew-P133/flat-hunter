@@ -5,7 +5,7 @@ import json
 
 def scrape(url):
     # get page html and write to file
-    page = requests.get(f"{url}")
+    page = requests.get(url)
     f = open("page.html", "w")
     f.write(f"{page.text}")
     f.close()
@@ -48,6 +48,16 @@ def scrape(url):
         # TODO: return this data in a useful form for rest of program
 
         i += 1
+
+def url_generator(attributes):
+
+    url = "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION^475"
+
+    for attribute in attributes:
+        url = url + "&" + attribute + "=" + str(attributes[attribute])
+        print(url)
+        return url
+
 
 
 

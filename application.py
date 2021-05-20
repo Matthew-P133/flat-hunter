@@ -1,3 +1,10 @@
-from helpers import scrape
+from helpers import scrape, url_generator
 
-scrape("https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION%5E475&insId=1&radius=0.0&minPrice=&maxPrice=&minBedrooms=&maxBedrooms=&displayPropertyType=&maxDaysSinceAdded=&sortByPriceDescending=&_includeLetAgreed=on&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&letType=&letFurnishType=&houseFlatShare=")
+attributes = {
+    "bedrooms": 1,
+    "floorplan": 1,
+}
+
+url = url_generator(attributes)
+
+scrape(url)
