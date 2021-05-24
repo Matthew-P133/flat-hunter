@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-
+import sqlite3
 
 def scrape(url, i):
     # get page html and write to file
@@ -32,7 +32,7 @@ def scrape(url, i):
     # property data is contained in this element
     properties = page_dict["properties"]
 
-    
+    db = sqlite3.connect("properties.db")
 
     # print various data for each property
     for property in properties:
@@ -45,8 +45,11 @@ def scrape(url, i):
         print("location : {}".format(property["displayAddress"]))
         print("price : {}".format(property["price"]["displayPrices"][0]["displayPrice"]), end="\n\n")
 
-        # TODO: return this data in a useful form for rest of program
-
+        data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"]]
+        # TO DO: return this data in a useful form for rest of program
+        cursor_obj = db.cursor()
+        cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics) VALUES(?, ?, ?, ?)", data)
+        db.commit()
         i += 1
     return page_dict, i
 
@@ -56,9 +59,4 @@ def url_generator(attributes):
 
     for attribute in attributes:
         url = url + "&" + attribute + "=" + str(attributes[attribute])
-        print(url)
     return url
-
-
-
-
