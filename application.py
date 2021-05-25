@@ -1,12 +1,13 @@
 from helpers import scrape, url_generator
 from time import sleep
+from random import random
 
 # TO DO: dynamically pass in attributes
 # attributes for testing
 attributes = {
-    "minBedrooms": 5,
+    "minBedrooms": 4,
     "maxBedrooms": 7,
-    "floorplan": 1,
+    # "floorplan": 1,
 }
 
 # variable to count properties
@@ -26,9 +27,10 @@ pagination = page_dict["pagination"]
 attributes["index"] =  pagination["next"]
 
 # until last page generate url of next page and scrape
-while (pagination["next"] <= pagination["last"]):
+while (int(pagination["next"]) <= int(pagination["last"])):
     url = url_generator(attributes)
-    sleep(5)
+    x = 10 * random()
+    sleep(x)
     result = scrape(url, i)
     i = result[1]
 
