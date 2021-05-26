@@ -55,10 +55,13 @@ def scrape(url, i):
             db.commit()
             print(image["srcUrl"])
 
-        data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"]]
+        data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
+                property["numberOfFloorplans"], property["price"]["displayPrices"][0]["displayPrice"], property["displayAddress"], 
+                property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
+                property["addedOrReduced"]]
+        
         # add property data to database
-        cursor_obj = db.cursor()
-        cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics) VALUES(?, ?, ?, ?)", data)
+        cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics, summary, floorplans, price, address, lattitude, longitude, updateDate, agent, firstVisible, addedOrReduced) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
         db.commit()
         i += 1
     return page_dict, i
