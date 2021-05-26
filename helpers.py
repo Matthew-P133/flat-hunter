@@ -6,6 +6,8 @@ import sqlite3
 def scrape(url, i):
     # get page html and write to file
     page = requests.get(url)
+    # if page.status_code != 200:
+        # TODO return error
     f = open("page.html", "w")
     f.write(f"{page.text}")
     f.close()
@@ -45,8 +47,16 @@ def scrape(url, i):
         print("location : {}".format(property["displayAddress"]))
         print("price : {}".format(property["price"]["displayPrices"][0]["displayPrice"]), end="\n\n")
 
+        # add image URLs to database
+        for image in property["propertyImages"]["images"]:
+            image_data = [property["id"], image["srcUrl"]]
+            cursor_obj = db.cursor()
+            cursor_obj.execute("INSERT INTO images (property_id, URL) VALUES(?, ?)", image_data)
+            db.commit()
+            print(image["srcUrl"])
+
         data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"]]
-        # TO DO: return this data in a useful form for rest of program
+        # add property data to database
         cursor_obj = db.cursor()
         cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics) VALUES(?, ?, ?, ?)", data)
         db.commit()
