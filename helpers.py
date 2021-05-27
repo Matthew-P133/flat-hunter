@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import sqlite3
+from PIL import Image
+import os
 
 def scrape(url, i):
     # get page html and write to file
@@ -38,23 +40,17 @@ def scrape(url, i):
 
     # print various data for each property
     for property in properties:
-        print("PROPERTY : {}".format(i))
-        print("bedrooms : {}".format(property["bedrooms"]))
-        print("bathrooms : {}".format(property["bathrooms"]))
-        print("pics : {}".format(property["numberOfImages"]))
-        print("floorplans : {}".format(property["numberOfFloorplans"]))
-        print("summary: {}".format(property["summary"]))
-        print("location : {}".format(property["displayAddress"]))
-        print("price : {}".format(property["price"]["displayPrices"][0]["displayPrice"]), end="\n\n")
 
         # add image URLs to database
+        y = 0
         for image in property["propertyImages"]["images"]:
             image_data = [property["id"], image["srcUrl"]]
             cursor_obj = db.cursor()
             cursor_obj.execute("INSERT INTO images (property_id, URL) VALUES(?, ?)", image_data)
             db.commit()
-            print(image["srcUrl"])
-
+            save(image["srcUrl"], property["id"], y)
+            y += 1
+  
         data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
                 property["numberOfFloorplans"], property["price"]["displayPrices"][0]["displayPrice"], property["displayAddress"], 
                 property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
@@ -72,4 +68,11 @@ def url_generator(attributes):
 
     for attribute in attributes:
         url = url + "&" + attribute + "=" + str(attributes[attribute])
+        
     return url
+
+def save(image_url, id, y):
+    r = requests.get(image_url)
+    if r.status_code == 200:
+        with open(f"images/{id}.{y}.jpg", 'wb') as f:
+            f.write(r.content)
