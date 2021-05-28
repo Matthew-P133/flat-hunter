@@ -68,11 +68,16 @@ def url_generator(attributes):
 
     for attribute in attributes:
         url = url + "&" + attribute + "=" + str(attributes[attribute])
-        
+
     return url
 
 def save(image_url, id, y):
     r = requests.get(image_url)
+    f = f"images/{id}/{y}.jpg"
+    
+    if not os.path.exists(os.path.dirname(f)):
+        os.makedirs(os.path.dirname(f))
+
     if r.status_code == 200:
-        with open(f"images/{id}.{y}.jpg", 'wb') as f:
+        with open(f"images/{id}/{y}.jpg", 'wb') as f:
             f.write(r.content)
