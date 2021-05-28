@@ -4,6 +4,7 @@ import json
 import sqlite3
 from PIL import Image
 import os
+from time import sleep
 
 def scrape(url, i):
     # get page html and write to file
@@ -49,6 +50,7 @@ def scrape(url, i):
             cursor_obj.execute("INSERT INTO images (property_id, URL) VALUES(?, ?)", image_data)
             db.commit()
             save(image["srcUrl"], property["id"], y)
+            sleep(0.2)
             y += 1
   
         data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
@@ -74,10 +76,12 @@ def url_generator(attributes):
 def save(image_url, id, y):
     r = requests.get(image_url)
     f = f"images/{id}/{y}.jpg"
-    
+
+    # check path exists
     if not os.path.exists(os.path.dirname(f)):
         os.makedirs(os.path.dirname(f))
 
+    # save image to correct folder
     if r.status_code == 200:
         with open(f"images/{id}/{y}.jpg", 'wb') as f:
             f.write(r.content)
