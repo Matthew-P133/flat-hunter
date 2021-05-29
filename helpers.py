@@ -6,20 +6,15 @@ from PIL import Image
 import os
 from time import sleep
 
-def search():
-    # TODO: dynamically pass in attributes
-    # attributes for testing
-    attributes = {
-        "minBedrooms": 6,
-        "maxBedrooms": 7,
-        "floorplan": 1,
-    }
+def search(attributes):
+    
 
     # variable to count properties
     i = 1
 
     # generate URL based on attributes
     url = url_generator(attributes)
+    print(url)
 
     # scrape page + update property counter
     result = scrape(url, i)
