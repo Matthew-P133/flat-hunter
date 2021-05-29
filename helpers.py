@@ -6,6 +6,48 @@ from PIL import Image
 import os
 from time import sleep
 
+def search():
+    # TODO: dynamically pass in attributes
+    # attributes for testing
+    attributes = {
+        "minBedrooms": 6,
+        "maxBedrooms": 7,
+        "floorplan": 1,
+    }
+
+    # variable to count properties
+    i = 1
+
+    # generate URL based on attributes
+    url = url_generator(attributes)
+
+    # scrape page + update property counter
+    result = scrape(url, i)
+    i = result[1]
+
+    # add index of next page to attributes
+    page_dict = result[0]
+    index = page_dict["searchParameters"]["index"]
+    pagination = page_dict["pagination"]
+    if "next" not in pagination.keys():
+            return 1
+    attributes["index"] = pagination["next"]
+
+    # until last page generate url of next page and scrape
+    while (int(pagination["next"]) <= int(pagination["last"])):
+        url = url_generator(attributes)
+        x = 10 * random()
+        sleep(x)
+        result = scrape(url, i)
+        i = result[1]
+
+        page_dict = result[0]
+        pagination = page_dict["pagination"]
+        if "next" not in pagination.keys():
+            return 1
+        attributes["index"] = pagination["next"]
+
+
 def scrape(url, i):
     # get page html and write to file
     page = requests.get(url)
@@ -75,7 +117,7 @@ def url_generator(attributes):
 
 def save(image_url, id, y):
     r = requests.get(image_url)
-    f = f"images/{id}/{y}.jpg"
+    f = f"static/images/{id}/{y}.jpg"
 
     # check path exists
     if not os.path.exists(os.path.dirname(f)):
@@ -83,5 +125,5 @@ def save(image_url, id, y):
 
     # save image to correct folder
     if r.status_code == 200:
-        with open(f"images/{id}/{y}.jpg", 'wb') as f:
+        with open(f"static/images/{id}/{y}.jpg", 'wb') as f:
             f.write(r.content)
