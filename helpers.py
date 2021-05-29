@@ -5,16 +5,15 @@ import sqlite3
 from PIL import Image
 import os
 from time import sleep
+from random import random
 
 def search(attributes):
     
-
     # variable to count properties
     i = 1
 
     # generate URL based on attributes
     url = url_generator(attributes)
-    print(url)
 
     # scrape page + update property counter
     result = scrape(url, i)
@@ -74,31 +73,37 @@ def scrape(url, i):
     # property data is contained in this element
     properties = page_dict["properties"]
 
+    # establish database connection
     db = sqlite3.connect("properties.db")
 
-    # print various data for each property
+    
     for property in properties:
-
-        # add image URLs to database
-        y = 0
-        for image in property["propertyImages"]["images"]:
-            image_data = [property["id"], image["srcUrl"]]
-            cursor_obj = db.cursor()
-            cursor_obj.execute("INSERT INTO images (property_id, URL) VALUES(?, ?)", image_data)
-            db.commit()
-            save(image["srcUrl"], property["id"], y)
-            sleep(0.2)
-            y += 1
-  
-        data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
-                property["numberOfFloorplans"], property["price"]["displayPrices"][0]["displayPrice"], property["displayAddress"], 
-                property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
-                property["addedOrReduced"]]
         
-        # add property data to database
-        cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics, summary, floorplans, price, address, lattitude, longitude, updateDate, agent, firstVisible, addedOrReduced) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
-        db.commit()
+        cursor = db.execute("SELECT * FROM properties WHERE propertyid=?", [property["id"]])
+        row = cursor.fetchone()
+        
+        if not row:
+            
+            y = 0
+            for image in property["propertyImages"]["images"]:
+                image_data = [property["id"], image["srcUrl"]]
+                cursor_obj = db.cursor()
+                cursor_obj.execute("INSERT INTO images (property_id, URL) VALUES(?, ?)", image_data)
+                db.commit()
+                save(image["srcUrl"], property["id"], y)
+                sleep(0.2)
+                y += 1
+    
+            data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
+                    property["numberOfFloorplans"], property["price"]["displayPrices"][0]["displayPrice"], property["displayAddress"], 
+                    property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
+                    property["addedOrReduced"]]
+            
+            cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics, summary, floorplans, price, address, lattitude, longitude, updateDate, agent, firstVisible, addedOrReduced) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
+            db.commit()
+
         i += 1
+        
     return page_dict, i
 
 def url_generator(attributes):

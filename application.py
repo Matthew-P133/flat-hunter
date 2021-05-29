@@ -1,6 +1,5 @@
 from helpers import search
 from time import sleep
-from random import random
 from flask import Flask, render_template, request, redirect
 import sqlite3
 
