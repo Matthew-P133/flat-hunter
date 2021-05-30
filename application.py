@@ -2,6 +2,7 @@ from helpers import search
 from time import sleep
 from flask import Flask, render_template, request, redirect
 import sqlite3
+import json
 
 db = sqlite3.connect("properties.db", check_same_thread=False)
 
@@ -19,6 +20,11 @@ def hompage():
 def preferences():
     return render_template("search.html")
 
+@app.route("/loading", methods=['GET', 'POST'])
+def loading():
+    
+    return render_template("loading.html", form_data=json.dumps(request.form))
+
 @app.route("/results", methods=['GET', 'POST'])
 
 # TODO render results of search into html page(s)
@@ -33,11 +39,14 @@ def results():
     if request.method == "GET":
         return redirect("/search")
     
-    attributes["minBedrooms"] = request.form.get("minBedrooms")
-    attributes["maxBedrooms"] = request.form.get("maxBedrooms")
-    attributes["minPrice"] = request.form.get("minPrice")
-    attributes["maxPrice"] = request.form.get("maxPrice")
+    form_data = request.get_json()
+    
+    attributes["minBedrooms"] = form_data["minBedrooms"]
+    attributes["maxBedrooms"] = form_data["maxBedrooms"]
+    attributes["minPrice"] = form_data["minPrice"]
+    attributes["maxPrice"] = form_data["maxPrice"]
 
+    print(f"{attributes}")
     search(attributes)
     
     properties = []
