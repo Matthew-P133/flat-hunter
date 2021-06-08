@@ -27,9 +27,9 @@
                             <div class="carousel-item active">
                               <img class="d-block w-100" src="/static/images/{{ property.propertyid }}/0.jpg" alt="property image">
                             </div>
-                            {% for i in range(property.pics) %}
+                            {% for i in range(property.pics - 1) %}
                               <div class="carousel-item">
-                                <img class="d-block w-100" src="/static/images/{{ property.propertyid }}/{{ i }}.jpg" alt="property image">
+                                <img class="d-block w-100" src="/static/images/{{ property.propertyid }}/{{ i + 1 }}.jpg" alt="property image">
                               </div>
                             {% endfor %}
                            
