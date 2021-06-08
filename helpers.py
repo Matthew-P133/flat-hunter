@@ -6,37 +6,61 @@ from PIL import Image
 import os
 from time import sleep
 from random import random
+ 
+# initialise counter variables
+i = 1
+counter = 0
+last = "[calculating]"
 
-def search(attributes):
-    
-    # variable to count properties
+
+def search(attributes): 
+    #ensure variables have default values
+    global i
+    global counter
+    global last
     i = 1
+    counter = 0
+    last = "[calculating]"
 
     # generate URL based on attributes
     url = url_generator(attributes)
 
-    # scrape page + update property counter
+    # scrape page
     result = scrape(url, i)
+    page_data = result[0]
+
+    #update counter
     i = result[1]
 
-    # add index of next page to attributes
-    page_dict = result[0]
-    index = page_dict["searchParameters"]["index"]
-    pagination = page_dict["pagination"]
+    # access pagination details
+    index = page_data["searchParameters"]["index"]
+    pagination = page_data["pagination"]
+
+    # generate number of properties (for loading screen)
+    last = "approx. " + str(int(pagination["last"]) + 24)
+
+    # quit if error (avoid looping over same page)
     if "next" not in pagination.keys():
             return 1
+    
+    # update attributes for next page to scrape 
     attributes["index"] = pagination["next"]
 
     # until last page generate url of next page and scrape
     while (int(pagination["next"]) <= int(pagination["last"])):
         url = url_generator(attributes)
-        x = 10 * random()
-        sleep(x)
+
+        # random wait between scrapes
+        wait = 10 * random()
+        sleep(wait)
+
+        #scrape page
         result = scrape(url, i)
+        page_data = result[0]
         i = result[1]
 
-        page_dict = result[0]
-        pagination = page_dict["pagination"]
+        # increment target for scraping
+        pagination = page_data["pagination"]
         if "next" not in pagination.keys():
             return 1
         attributes["index"] = pagination["next"]
@@ -58,9 +82,9 @@ def scrape(url, i):
     # find element containing property data and write to file
     x = soup.find_all("script")
     for tag in x:
-        y = str(tag.string)
-        if "window.jsonModel = {\"properties" in y:
-            json_string = y.lstrip("window.jsonModel = ")
+        a = str(tag.string)
+        if "window.jsonModel = {\"properties" in a:
+            json_string = a.lstrip("window.jsonModel = ")
             f = open("page.json", "w")
             f.write(f"{json_string}")
             f.close()
@@ -70,21 +94,28 @@ def scrape(url, i):
     with open("page.json") as fp:
         page_dict = json.load(fp)
 
-    # property data is contained in this element
+    # property data is contained in this list of dicts
     properties = page_dict["properties"]
 
     # establish database connection
     db = sqlite3.connect("properties.db")
 
-    
     for property in properties:
         
+        # for loading screen
+        global counter
+        counter += 1
+        
+        # check if property already in db
         cursor = db.execute("SELECT * FROM properties WHERE propertyid=?", [property["id"]])
         row = cursor.fetchone()
         
+        # if not
         if not row:
-            
+
             y = 0
+
+            # download images
             for image in property["propertyImages"]["images"]:
                 image_data = [property["id"], image["srcUrl"]]
                 cursor_obj = db.cursor()
@@ -94,6 +125,7 @@ def scrape(url, i):
                 sleep(0.2)
                 y += 1
     
+            # add property to database
             data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
                     property["numberOfFloorplans"], property["price"]["displayPrices"][0]["displayPrice"], property["displayAddress"], 
                     property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
@@ -106,24 +138,32 @@ def scrape(url, i):
         
     return page_dict, i
 
+
 def url_generator(attributes):
 
+    # root URL
     url = "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION^475"
 
+    # generate target URL by concatenation
     for attribute in attributes:
         url = url + "&" + attribute + "=" + str(attributes[attribute])
 
     return url
 
+
 def save(image_url, id, y):
+
+    # get image
     r = requests.get(image_url)
+
+    # file pointer
     f = f"static/images/{id}/{y}.jpg"
 
     # check path exists
     if not os.path.exists(os.path.dirname(f)):
         os.makedirs(os.path.dirname(f))
 
-    # save image to correct folder
+    # save image
     if r.status_code == 200:
         with open(f"static/images/{id}/{y}.jpg", 'wb') as f:
             f.write(r.content)

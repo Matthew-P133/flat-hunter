@@ -26,22 +26,54 @@
 
     <body>  
     <div id="demo">
-        Loading, please wait...
+        
+        <div id="status"></div>
+        
+        
     </div>
      
     <script>
       
+      
+
       a = new XMLHttpRequest;
       a.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200){
           document.getElementById("demo").innerHTML = this.responseText;
-          
+          stopChecking(); 
         }
       };
   
       a.open("POST", "http://127.0.0.1:5000/results", true);
       a.setRequestHeader( 'Content-Type', 'application/json');
       a.send({{ form_data | tojson  | safe }});
+
+      var d = setInterval(makeRequest, 1000);
+
+      function makeRequest()
+      {
+        b = new XMLHttpRequest;
+        b.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementById("status").innerHTML = this.responseText;
+          }
+        };
+        b.open("GET", "http://127.0.0.1:5000/status");
+        b.send();
+      }
+
+      function stopChecking() {
+        clearInterval(d);
+      }
+     
+      
+      
+    
+
+      
+      
+
+
     </script>
               
 </body>

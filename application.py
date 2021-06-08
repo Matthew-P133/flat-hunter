@@ -1,12 +1,15 @@
 from helpers import search
+import helpers
 from time import sleep
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import json
 
+# connect to db
 db = sqlite3.connect("properties.db", check_same_thread=False)
 
 app = Flask(__name__)
+
 
 @app.route("/")
 # TODO homepage
@@ -20,14 +23,21 @@ def hompage():
 def preferences():
     return render_template("search.html")
 
+
 @app.route("/loading", methods=['GET', 'POST'])
 def loading():
     
     return render_template("loading.html", form_data=json.dumps(request.form))
 
+
+@app.route("/status")
+def status():
+    status = {"last": str(helpers.last), "counter": str(helpers.counter)}
+    return render_template("status.html", status=status)
+
+
 @app.route("/results", methods=['GET', 'POST'])
 
-# TODO render results of search into html page(s)
 def results():
 
     attributes = {
