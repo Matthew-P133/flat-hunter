@@ -6,6 +6,7 @@ from PIL import Image
 import os
 from time import sleep
 from random import random
+from xhtml2pdf import pisa
  
 # initialise counter variables
 i = 1
@@ -167,3 +168,12 @@ def save(image_url, id, y):
     if r.status_code == 200:
         with open(f"static/images/{id}/{y}.jpg", 'wb') as f:
             f.write(r.content)
+
+def convert_html_to_pdf(html, output_file):
+    result_file = open(output_file, "w+b")
+
+    pisa_status = pisa.CreatePDF(html, dest=result_file)
+
+    result_file.close()
+
+    return pisa_status.err
