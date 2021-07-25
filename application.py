@@ -1,3 +1,4 @@
+from requests import NullHandler
 from helpers import search
 from helpers import convert_html_to_pdf
 import helpers
@@ -74,7 +75,8 @@ def results():
     attributes["maxBedrooms"] = form_data["maxBedrooms"]
     attributes["minPrice"] = form_data["minPrice"]
     attributes["maxPrice"] = form_data["maxPrice"]
-    attributes["frequency"] = form_data["frequency"]
+    if "frequency" in form_data.keys():
+        attributes["frequency"] = form_data["frequency"]
 
     if attributes["frequency"] == 0:
         # search once
@@ -95,16 +97,21 @@ def results():
         return render_template("results.html", properties=properties, images=images)
     
     # TODO Schedule repeat search
-
-
-
+    search(attributes)
     
-    
-<<<<<<< HEAD
-=======
+    properties = []
+    db.row_factory = sqlite3.Row
+    cursor = db.execute("SELECT * FROM properties")
+    for row in cursor:
+        properties.append(row)
+
+    images = []
+    for property in properties:
+        cursor = db.execute("SELECT * FROM images")
+        for row in cursor:
+            images.append(row)
+
     html = render_template("results.html", properties=properties, images=images)
-    #html = "<body>Hello</body>"
-    print(html)
 
     outputfile = "outputfile.pdf"
 
@@ -113,7 +120,6 @@ def results():
     return html
 
 
->>>>>>> report
 
 
 @app.route("/email")
