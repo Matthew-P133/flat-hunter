@@ -19,9 +19,14 @@ def hompage():
 
 @app.route("/search")
 
-# TODO allow user to input preferences for attributes
+
 def preferences():
     return render_template("search.html")
+
+@app.route("/schedule")
+
+def scheduler():
+    return render_template("schedule.html")
 
 
 @app.route("/loading", methods=['GET', 'POST'])
@@ -44,34 +49,47 @@ def results():
         "minBedrooms": 0,
         "maxBedrooms": 0,
         "floorplan": 1,
+        "frequency": 0
     }
     
     if request.method == "GET":
         return redirect("/search")
     
     form_data = request.get_json()
+    if form_data == None:
+        form_data = request.form
     
     attributes["minBedrooms"] = form_data["minBedrooms"]
     attributes["maxBedrooms"] = form_data["maxBedrooms"]
     attributes["minPrice"] = form_data["minPrice"]
     attributes["maxPrice"] = form_data["maxPrice"]
+    attributes["frequency"] = form_data["frequency"]
 
-    print(f"{attributes}")
-    search(attributes)
+    print(attributes["frequency"])
+    if attributes["frequency"] == 0:
+        # search once
+        search(attributes)
     
-    properties = []
-    db.row_factory = sqlite3.Row
-    cursor = db.execute("SELECT * FROM properties")
-    for row in cursor:
-        properties.append(row)
-
-    images = []
-    for property in properties:
-        cursor = db.execute("SELECT * FROM images")
+        properties = []
+        db.row_factory = sqlite3.Row
+        cursor = db.execute("SELECT * FROM properties")
         for row in cursor:
-            images.append(row)
+            properties.append(row)
+
+        images = []
+        for property in properties:
+            cursor = db.execute("SELECT * FROM images")
+            for row in cursor:
+                images.append(row)
     
-    return render_template("results.html", properties=properties, images=images)
+        return render_template("results.html", properties=properties, images=images)
+    
+    # Schedule repeat search
+
+
+
+    
+    
 
 
 @app.route("/email")
@@ -79,3 +97,5 @@ def results():
 # TODO email the results in a pdf
 def pdf():
     return("pdf")
+
+
