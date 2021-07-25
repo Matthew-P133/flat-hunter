@@ -65,7 +65,6 @@ def results():
     attributes["maxPrice"] = form_data["maxPrice"]
     attributes["frequency"] = form_data["frequency"]
 
-    print(attributes["frequency"])
     if attributes["frequency"] == 0:
         # search once
         search(attributes)
@@ -84,7 +83,7 @@ def results():
     
         return render_template("results.html", properties=properties, images=images)
     
-    # Schedule repeat search
+    # TODO Schedule repeat search
 
 
 
