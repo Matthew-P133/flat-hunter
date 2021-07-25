@@ -2,7 +2,8 @@ from requests import NullHandler
 from helpers import search
 from helpers import convert_html_to_pdf
 import helpers
-from time import sleep
+from time import sleep, time
+from datetime import datetime
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import json
@@ -21,6 +22,8 @@ class Pdf():
         pisa.CreatePDF(html, pdf)
 
         return pdf.getvalue()
+
+
 
 
 @app.route("/")
@@ -112,12 +115,9 @@ def results():
             images.append(row)
 
     html = render_template("results.html", properties=properties, images=images)
-
-    outputfile = "outputfile.pdf"
-
+    outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
     convert_html_to_pdf(html, outputfile)
-
-    return html
+    return("Your results have been saved as a PDF (next feature to be implemented is emailing them to you!)")
 
 
 
