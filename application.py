@@ -1,4 +1,5 @@
 from helpers import search
+from helpers import convert_html_to_pdf
 import helpers
 from time import sleep
 from flask import Flask, render_template, request, redirect
@@ -9,6 +10,16 @@ import json
 db = sqlite3.connect("properties.db", check_same_thread=False)
 
 app = Flask(__name__)
+
+class Pdf():
+    def render_pdf(self, name, html):
+        from xhtml2pdf import pisa
+    
+
+        pdf = "testfile"
+        pisa.CreatePDF(html, pdf)
+
+        return pdf.getvalue()
 
 
 @app.route("/")
@@ -89,6 +100,20 @@ def results():
 
     
     
+<<<<<<< HEAD
+=======
+    html = render_template("results.html", properties=properties, images=images)
+    #html = "<body>Hello</body>"
+    print(html)
+
+    outputfile = "outputfile.pdf"
+
+    convert_html_to_pdf(html, outputfile)
+
+    return html
+
+
+>>>>>>> report
 
 
 @app.route("/email")
