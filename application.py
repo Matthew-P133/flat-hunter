@@ -8,6 +8,14 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 import json
 import schedule
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.encoders import encode_base64
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
 
 # connect to db
 db = sqlite3.connect("properties.db", check_same_thread=False)
@@ -48,16 +56,53 @@ def scheduled_hunt(attributes):
     html = hunt(attributes)
     outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
     convert_html_to_pdf(html, outputfile)
+    email_results(outputfile)
+
+def email_results(outputfile):
+
+    # configure details
+    sender_address = config["address"]
+    sender_pass = config["pass"]
+    receiver_address = config["recipient"]
+
+    # content
+    mail_content = "Flats coming soon!"
+
+    # Set up the email message
+    message = MIMEMultipart()
+    message['From'] = sender_address
+    message['To'] = receiver_address
+    message['Subject'] = 'Your latest FlatHunter results'
+
+    # Configure attachment
+    
+    part = MIMEBase('application', "octet-stream")
+    part.set_payload(open(f"{outputfile}", "rb").read())
+    encode_base64(part)
+    part.add_header('Content-Disposition', f'attachment; filename="{outputfile}"')
+
+    # put together email
+    message.attach(MIMEText(mail_content, 'plain'))
+    message.attach(part)
+
+    #Create SMTP session and send the email
+    session = smtplib.SMTP('smtp.gmail.com', 587)
+    session.starttls()
+    session.login(sender_address, sender_pass) 
+    text = message.as_string()
+    session.sendmail(sender_address, receiver_address, text)
+    session.quit()
+    print('Mail Sent')
 
 
 @app.route("/")
+
 # TODO homepage
 def hompage():
     return render_template("index.html")
     
 
 @app.route("/search")
-
 
 def preferences():
     return render_template("search.html")
@@ -114,7 +159,7 @@ def results():
     
     # if 'schedule a search' generate pdf and schedule further searches
     if attributes["frequency"] == "Hourly":
-        delay = 60
+        delay = 1
     elif attributes["frequency"] == "Daily":
         delay = 1440
     elif attributes["frequency"] == "Weekly":
