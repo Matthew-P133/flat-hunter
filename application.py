@@ -23,8 +23,24 @@ class Pdf():
 
         return pdf.getvalue()
 
+def hunt(attributes):
+    
+    search(attributes)
+    
+    properties = []
+    db.row_factory = sqlite3.Row
+    cursor = db.execute("SELECT * FROM properties")
+    for row in cursor:
+        properties.append(row)
 
-
+    images = []
+    for property in properties:
+        cursor = db.execute("SELECT * FROM images")
+        for row in cursor:
+            images.append(row)
+    
+    return (properties, images)
+    
 
 @app.route("/")
 # TODO homepage
@@ -37,6 +53,7 @@ def hompage():
 
 def preferences():
     return render_template("search.html")
+
 
 @app.route("/schedule")
 
@@ -60,6 +77,7 @@ def status():
 
 def results():
 
+    # default attributes
     attributes = {
         "minBedrooms": 0,
         "maxBedrooms": 0,
@@ -70,6 +88,7 @@ def results():
     if request.method == "GET":
         return redirect("/search")
     
+    #populate attributes dictionary with user input
     form_data = request.get_json()
     if form_data == None:
         form_data = request.form
@@ -81,51 +100,17 @@ def results():
     if "frequency" in form_data.keys():
         attributes["frequency"] = form_data["frequency"]
 
+    # perform flat hunt + generate html of results
+    results = hunt(attributes)
+    html = render_template("results.html", properties=results[0], images=results[1])
+
+    # if 'search now' return webpage
     if attributes["frequency"] == 0:
-        # search once
-        search(attributes)
+        return html
     
-        properties = []
-        db.row_factory = sqlite3.Row
-        cursor = db.execute("SELECT * FROM properties")
-        for row in cursor:
-            properties.append(row)
-
-        images = []
-        for property in properties:
-            cursor = db.execute("SELECT * FROM images")
-            for row in cursor:
-                images.append(row)
-    
-        return render_template("results.html", properties=properties, images=images)
-    
-    # TODO Schedule repeat search
-    search(attributes)
-    
-    properties = []
-    db.row_factory = sqlite3.Row
-    cursor = db.execute("SELECT * FROM properties")
-    for row in cursor:
-        properties.append(row)
-
-    images = []
-    for property in properties:
-        cursor = db.execute("SELECT * FROM images")
-        for row in cursor:
-            images.append(row)
-
-    html = render_template("results.html", properties=properties, images=images)
+    # if 'schedule a search' generate pdf
     outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
     convert_html_to_pdf(html, outputfile)
     return("Your results have been saved as a PDF (next feature to be implemented is emailing them to you!)")
-
-
-
-
-@app.route("/email")
-
-# TODO email the results in a pdf
-def pdf():
-    return("pdf")
 
 
