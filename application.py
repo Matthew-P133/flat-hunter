@@ -7,6 +7,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import json
+import schedule
 
 # connect to db
 db = sqlite3.connect("properties.db", check_same_thread=False)
@@ -39,8 +40,15 @@ def hunt(attributes):
         for row in cursor:
             images.append(row)
     
-    return (properties, images)
-    
+    html = render_template("results.html", properties=properties, images=images)
+    return html
+
+def scheduled_hunt(attributes):
+
+    html = hunt(attributes)
+    outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
+    convert_html_to_pdf(html, outputfile)
+
 
 @app.route("/")
 # TODO homepage
@@ -99,18 +107,24 @@ def results():
     attributes["maxPrice"] = form_data["maxPrice"]
     if "frequency" in form_data.keys():
         attributes["frequency"] = form_data["frequency"]
-
-    # perform flat hunt + generate html of results
-    results = hunt(attributes)
-    html = render_template("results.html", properties=results[0], images=results[1])
-
+    
     # if 'search now' return webpage
     if attributes["frequency"] == 0:
-        return html
+        return hunt(attributes)
     
-    # if 'schedule a search' generate pdf
-    outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
-    convert_html_to_pdf(html, outputfile)
-    return("Your results have been saved as a PDF (next feature to be implemented is emailing them to you!)")
+    # if 'schedule a search' generate pdf and schedule further searches
+    if attributes["frequency"] == "Hourly":
+        delay = 60
+    elif attributes["frequency"] == "Daily":
+        delay = 1440
+    elif attributes["frequency"] == "Weekly":
+        delay = 10080
+
+    schedule.every(delay).minutes.do(scheduled_hunt, attributes)
+
+    while 1:
+        schedule.run_pending()
+        sleep(1)
+    
 
 
