@@ -26,7 +26,6 @@ class Pdf():
     def render_pdf(self, name, html):
         from xhtml2pdf import pisa
     
-
         pdf = "testfile"
         pisa.CreatePDF(html, pdf)
 
@@ -38,7 +37,7 @@ def hunt(attributes):
     
     properties = []
     db.row_factory = sqlite3.Row
-    cursor = db.execute("SELECT * FROM properties")
+    cursor = db.execute("SELECT * FROM properties where search_id=3")
     for row in cursor:
         properties.append(row)
 
@@ -159,7 +158,7 @@ def results():
     
     # if 'schedule a search' generate pdf and schedule further searches
     if attributes["frequency"] == "Hourly":
-        delay = 1
+        delay = 60
     elif attributes["frequency"] == "Daily":
         delay = 1440
     elif attributes["frequency"] == "Weekly":

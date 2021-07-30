@@ -23,11 +23,23 @@ def search(attributes):
     counter = 0
     last = "[calculating]"
 
+    db = sqlite3.connect("properties.db")
+
+    # set search id
+    cursor = db.execute("SELECT MAX(search_id) FROM properties")
+    search_id = cursor.fetchone()
+    print(search_id[0])
+    if search_id[0] == None:
+        new_search_id = 1
+    else:
+        new_search_id = search_id[0] + 1
+    print(new_search_id)
+
     # generate URL based on attributes
     url = url_generator(attributes)
 
     # scrape page
-    result = scrape(url, i)
+    result = scrape(url, i, new_search_id)
     page_data = result[0]
 
     #update counter
@@ -56,7 +68,7 @@ def search(attributes):
         sleep(wait)
 
         #scrape page
-        result = scrape(url, i)
+        result = scrape(url, i, new_search_id)
         page_data = result[0]
         i = result[1]
 
@@ -67,7 +79,7 @@ def search(attributes):
         attributes["index"] = pagination["next"]
 
 
-def scrape(url, i):
+def scrape(url, i, new_search_id):
     # get page html and write to file
     page = requests.get(url)
     # if page.status_code != 200:
@@ -130,9 +142,9 @@ def scrape(url, i):
             data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
                     property["numberOfFloorplans"], property["price"]["displayPrices"][0]["displayPrice"], property["displayAddress"], 
                     property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
-                    property["addedOrReduced"]]
+                    property["addedOrReduced"], new_search_id]
             
-            cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics, summary, floorplans, price, address, lattitude, longitude, updateDate, agent, firstVisible, addedOrReduced) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
+            cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics, summary, floorplans, price, address, lattitude, longitude, updateDate, agent, firstVisible, addedOrReduced, search_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
             db.commit()
 
         i += 1
