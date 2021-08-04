@@ -28,12 +28,10 @@ def search(attributes):
     # set search id
     cursor = db.execute("SELECT MAX(search_id) FROM properties")
     search_id = cursor.fetchone()
-    print(search_id[0])
     if search_id[0] == None:
         new_search_id = 1
     else:
         new_search_id = search_id[0] + 1
-    print(new_search_id)
 
     # generate URL based on attributes
     url = url_generator(attributes)
@@ -77,6 +75,7 @@ def search(attributes):
         if "next" not in pagination.keys():
             return 1
         attributes["index"] = pagination["next"]
+    
 
 
 def scrape(url, i, new_search_id):
@@ -144,6 +143,7 @@ def scrape(url, i, new_search_id):
                     property["location"]["latitude"], property["location"]["longitude"], property["listingUpdate"]["listingUpdateDate"], property["customer"]["branchDisplayName"], property["firstVisibleDate"], 
                     property["addedOrReduced"], new_search_id]
             
+            cursor_obj = db.cursor()
             cursor_obj.execute("INSERT or REPLACE INTO properties (propertyid, bedrooms, bathrooms, pics, summary, floorplans, price, address, lattitude, longitude, updateDate, agent, firstVisible, addedOrReduced, search_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
             db.commit()
 
@@ -183,9 +183,6 @@ def save(image_url, id, y):
 
 def convert_html_to_pdf(html, output_file):
     result_file = open(output_file, "w+b")
-
     pisa_status = pisa.CreatePDF(html, dest=result_file)
-
     result_file.close()
-
     return pisa_status.err

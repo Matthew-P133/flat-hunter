@@ -22,26 +22,32 @@ db = sqlite3.connect("properties.db", check_same_thread=False)
 
 app = Flask(__name__)
 
+
 class Pdf():
     def render_pdf(self, name, html):
         from xhtml2pdf import pisa
-    
         pdf = "testfile"
         pisa.CreatePDF(html, pdf)
-
         return pdf.getvalue()
+
 
 def hunt(attributes):
     
     search(attributes)
+
+    cursor = db.execute("SELECT MAX(search_id) FROM properties")
+    max_search_id = cursor.fetchone()
+    print(max_search_id[0])
     
     properties = []
     db.row_factory = sqlite3.Row
-    cursor = db.execute("SELECT * FROM properties where search_id=3")
+    cursor = db.execute("SELECT * FROM properties where search_id=?", [max_search_id[0]])
+    
     for row in cursor:
         properties.append(row)
 
     images = []
+
     for property in properties:
         cursor = db.execute("SELECT * FROM images")
         for row in cursor:
@@ -50,12 +56,14 @@ def hunt(attributes):
     html = render_template("results.html", properties=properties, images=images)
     return html
 
+
 def scheduled_hunt(attributes):
 
     html = hunt(attributes)
     outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
     convert_html_to_pdf(html, outputfile)
     email_results(outputfile)
+
 
 def email_results(outputfile):
 
@@ -169,6 +177,3 @@ def results():
     while 1:
         schedule.run_pending()
         sleep(1)
-    
-
-
