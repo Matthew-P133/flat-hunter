@@ -59,7 +59,28 @@ def hunt(attributes):
 
 def scheduled_hunt(attributes):
 
-    html = hunt(attributes)
+    search(attributes)
+
+    cursor = db.execute("SELECT MAX(search_id) FROM properties")
+    max_search_id = cursor.fetchone()
+    print(max_search_id[0])
+    
+    properties = []
+    db.row_factory = sqlite3.Row
+    cursor = db.execute("SELECT * FROM properties where search_id=?", [max_search_id[0]])
+    
+    for row in cursor:
+        properties.append(row)
+
+    images = []
+
+    for property in properties:
+        cursor = db.execute("SELECT * FROM images")
+        for row in cursor:
+            images.append(row)
+    
+    html = render_template("results_for_email.html", properties=properties, images=images)
+    
     outputfile = f"FlatHunter-results-{datetime.now()}.pdf"
     convert_html_to_pdf(html, outputfile)
     email_results(outputfile)
@@ -122,16 +143,16 @@ def scheduler():
 
 
 @app.route("/loading", methods=['GET', 'POST'])
+
 def loading():
-    
     return render_template("loading.html", form_data=json.dumps(request.form))
 
 
 @app.route("/status")
+
 def status():
     status = {"last": str(helpers.last), "counter": str(helpers.counter)}
     return render_template("status.html", status=status)
-
 
 @app.route("/results", methods=['GET', 'POST'])
 

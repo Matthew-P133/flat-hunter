@@ -1,0 +1,14 @@
+{% block main %}
+  
+                {% for property in properties %}
+                   
+                  {% for i in range(4) %}
+                    <img src="/home/linuxvm/projects/flat-hunter/static/images/{{ property.propertyid }}/{{ i + 1 }}.jpg" alt="property image" width="auto" height="100">
+                    <img src="/home/linuxvm/projects/flat-hunter/static/images/whitespace.jpg" alt="whitespace">
+                  {% endfor %}
+            
+                  <p><a href="https://www.rightmove.co.uk/properties/{{ property.propertyid }}#">{{ property.address }}</a> - {{ property.price }}</p>
+ 
+                {% endfor %}
+
+{% endblock %}
