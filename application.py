@@ -1,4 +1,4 @@
-from requests import NullHandler
+import requests
 from helpers import search
 from helpers import hunt
 from helpers import scheduled_hunt
@@ -9,13 +9,10 @@ import sqlite3
 import json
 import schedule
 
-
 app = Flask(__name__)
-
 
 @app.route("/")
 
-# TODO homepage
 def hompage():
     return render_template("index.html")
     
@@ -47,7 +44,7 @@ def status():
 @app.route("/results", methods=['GET', 'POST'])
 
 def results():
-    # default attributes
+    # set default attributes
     attributes = {
         "minBedrooms": 0,
         "maxBedrooms": 0,
@@ -58,7 +55,7 @@ def results():
     if request.method == "GET":
         return redirect("/search")
     
-    #populate attributes dictionary with user input
+    # populate attributes dictionary with user input
     form_data = request.get_json()
     if form_data == None:
         form_data = request.form
@@ -70,13 +67,13 @@ def results():
     if "frequency" in form_data.keys():
         attributes["frequency"] = form_data["frequency"]
     
-    # if 'search now' return webpage
+    # if 'search now' return webpage of results
     if attributes["frequency"] == 0:
         return hunt(attributes)
     
-    # if 'schedule a search' generate pdf and schedule further searches
+    # if 'regular search' schedule searches
     if attributes["frequency"] == "Hourly":
-        delay = 60
+        delay = 1
     elif attributes["frequency"] == "Daily":
         delay = 1440
     elif attributes["frequency"] == "Weekly":

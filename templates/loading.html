@@ -24,22 +24,17 @@
 
     </head>
 
-    <body>  
-    <div id="demo">
-        
-        <div id="status"></div>
-        
-        
+    <body> 
+
+    <div id="results">
+      <div id="status"></div>
     </div>
      
     <script>
-      
-      
-
       a = new XMLHttpRequest;
       a.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200){
-          document.getElementById("demo").innerHTML = this.responseText;
+          document.getElementById("results").innerHTML = this.responseText;
           stopChecking(); 
         }
       };
@@ -65,15 +60,6 @@
       function stopChecking() {
         clearInterval(d);
       }
-     
-      
-      
-    
-
-      
-      
-
-
     </script>
               
 </body>

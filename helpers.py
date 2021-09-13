@@ -19,7 +19,6 @@ from flask import render_template
 # environment variables for email username and password
 config = dotenv_values(".env")
 
-
 # initialise counter variables
 i = 1
 counter = 0
@@ -94,8 +93,6 @@ def search(attributes):
 def scrape(url, i, new_search_id):
     # get page html and write to file
     page = requests.get(url)
-    # if page.status_code != 200:
-        # TODO return error
     f = open("page.html", "w")
     f.write(f"{page.text}")
     f.close()
@@ -127,7 +124,7 @@ def scrape(url, i, new_search_id):
 
     for property in properties:
         
-        # for loading screen
+        # update variable for loading screen
         global counter
         counter += 1
         
@@ -138,7 +135,7 @@ def scrape(url, i, new_search_id):
         # if not
         if not row:
 
-            y = 0
+            image_number = 0
 
             # download images
             for image in property["propertyImages"]["images"]:
@@ -146,9 +143,9 @@ def scrape(url, i, new_search_id):
                 cursor_obj = db.cursor()
                 cursor_obj.execute("INSERT INTO images (property_id, URL) VALUES(?, ?)", image_data)
                 db.commit()
-                save(image["srcUrl"], property["id"], y)
+                save(image["srcUrl"], property["id"], image_number)
                 sleep(0.2)
-                y += 1
+                image_number += 1
     
             # add property to database
             data = [property["id"], property["bedrooms"], property["bathrooms"], property["numberOfImages"], property["summary"], 
@@ -167,7 +164,7 @@ def scrape(url, i, new_search_id):
 
 def url_generator(attributes):
 
-    # root URL
+    # root URL - edit this to change location of search
     url = "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION^475"
 
     # generate target URL by concatenation
@@ -177,13 +174,13 @@ def url_generator(attributes):
     return url
 
 
-def save(image_url, id, y):
+def save(image_url, id, image_number):
 
     # get image
     r = requests.get(image_url)
 
     # file pointer
-    f = f"static/images/{id}/{y}.jpg"
+    f = f"static/images/{id}/{image_number}.jpg"
 
     # check path exists
     if not os.path.exists(os.path.dirname(f)):
@@ -191,10 +188,12 @@ def save(image_url, id, y):
 
     # save image
     if r.status_code == 200:
-        with open(f"static/images/{id}/{y}.jpg", 'wb') as f:
+        with open(f"static/images/{id}/{image_number}.jpg", 'wb') as f:
             f.write(r.content)
 
+
 def convert_html_to_pdf(html, output_file):
+
     result_file = open(output_file, "w+b")
     pisa_status = pisa.CreatePDF(html, dest=result_file)
     result_file.close()
@@ -203,13 +202,13 @@ def convert_html_to_pdf(html, output_file):
 
 def email_results(outputfile):
 
-    # configure details
+    # configure login details
     sender_address = config["address"]
     sender_pass = config["pass"]
     receiver_address = config["recipient"]
 
     # content
-    mail_content = "Flats coming soon!"
+    mail_content = "Flats attached!"
 
     # Set up the email message
     message = MIMEMultipart()
@@ -218,7 +217,6 @@ def email_results(outputfile):
     message['Subject'] = 'Your latest FlatHunter results'
 
     # Configure attachment
-    
     part = MIMEBase('application', "octet-stream")
     part.set_payload(open(f"{outputfile}", "rb").read())
     encode_base64(part)
