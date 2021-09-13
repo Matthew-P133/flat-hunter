@@ -5,7 +5,6 @@ from helpers import scheduled_hunt
 import helpers
 from time import sleep, time
 from flask import Flask, render_template, request, redirect
-import sqlite3
 import json
 import schedule
 
@@ -73,7 +72,7 @@ def results():
     
     # if 'regular search' schedule searches
     if attributes["frequency"] == "Hourly":
-        delay = 1
+        delay = 60
     elif attributes["frequency"] == "Daily":
         delay = 1440
     elif attributes["frequency"] == "Weekly":
