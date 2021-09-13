@@ -4,7 +4,7 @@
 
 ## Introduction
 
-FlatHunter is a simple tool designed to lessen the tedium of searching for a new flat (or apartment in US English). It will (responsibly) scrape Rightmove (a UK real estate website) accordingly to chosen criteria and email out a regular PDF digest of new flats.
+FlatHunter is a simple tool designed to lessen the tedium of searching for a new flat (or apartment in US English). It will (responsibly) scrape Rightmove (a UK real estate website) according to chosen criteria and email out a regular PDF digest of new flats.
 <p align="center">
   <img width="300" height="auto" src="/assets/example_email.jpg">
  </p>
