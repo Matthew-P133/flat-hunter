@@ -29,7 +29,7 @@ Alternatively, if the user elects to set up a 'Regular Search' scraping will occ
 
 *This should only be done on an account set up and used exclusively for this service*
 
-In order to send emails the script must have access to a gmail account with ['allow less secure apps'](https://myaccount.google.com/lesssecureapps). Credentials are imported as environment variables - to set this up create a file called .env in the application directory with the following structure:
+In order to send emails the script must have access to a gmail account with ['allow less secure apps'](https://myaccount.google.com/lesssecureapps) turned on. Credentials are imported as environment variables - to set this up create a file called .env in the application directory with the following structure:
     
     address=senderemailaddress
     password=password
