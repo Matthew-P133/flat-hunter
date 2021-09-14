@@ -4,7 +4,7 @@
 
 ## Introduction
 
-FlatHunter is a simple tool designed to lessen the tedium of searching for a new flat (or apartment in US English). It will (responsibly) scrape Rightmove (a UK real estate website) accordingly to chosen criteria and email out a regular PDF digest of new flats.
+FlatHunter is a simple tool designed to lessen the tedium of searching for a new flat (or apartment in US English). It will (responsibly) scrape Rightmove (a UK real estate website) according to chosen criteria and email out a regular PDF digest of new flats.
 <p align="center">
   <img width="300" height="auto" src="/assets/example_email.jpg">
  </p>
@@ -16,7 +16,7 @@ FlatHunter is a simple tool designed to lessen the tedium of searching for a new
     
 For each http request performed, the returned HTML is parsed using BeautifulSoup and trimmed down to the useful stuff (json data for the properties present on that page) which is then written to a SQLlite database of properties. Further pages of results (if present) are scraped until the scraper identifies that it has reached the end (by interrogating pagination data). Images are also downloaded. To minimise bandwith usage, the pictures are downloaded as thumbnails and are not re-downloaded if the property has already been scraped by FlatHunter.
     
-Random waits are introduced between web requests to avoid creating nuisance amounts of traffic. Because of this, a search with more than one page of results can take a while. To avoid apparent hanging, for 'Search Now' progress is displayed on a simple loading screen implemented with some client-side javascript which queries the value of a counter variable in the python backend and redirect the browser to the results when they are ready.
+Random waits are introduced between web requests to avoid creating nuisance amounts of traffic. Because of this, a search with more than one page of results can take a while. To avoid apparent hanging, for 'Search Now' progress is displayed on a simple loading screen implemented with some client-side javascript which queries the value of a counter variable in the python backend and redirects the browser to the results when they are ready.
 
 Alternatively, if the user elects to set up a 'Regular Search' scraping will occur in the background. At regular intervals a summary of newly discovered properties will then be appended to a basic PDF (created from the HTML with the xhtml2pdf library) and emailed to the user:
 
@@ -29,7 +29,7 @@ Alternatively, if the user elects to set up a 'Regular Search' scraping will occ
 
 *This should only be done on an account set up and used exclusively for this service*
 
-In order to send emails the script must have access to a gmail account with ['allow less secure apps'](https://myaccount.google.com/lesssecureapps). Credentials are imported as environment variables - to set this up create a file called .env in the application directory with the following structure:
+In order to send emails the script must have access to a gmail account with ['allow less secure apps'](https://myaccount.google.com/lesssecureapps) turned on. Credentials are imported as environment variables - to set this up create a file called .env in the application directory with the following structure:
     
     address=senderemailaddress
     password=password
